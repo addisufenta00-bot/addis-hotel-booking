@@ -118,6 +118,7 @@ export default function App() {
   const [authName, setAuthName] = useState('');
   const [authPhone, setAuthPhone] = useState('');
   const [authError, setAuthError] = useState('');
+  const [isSubmittingAuth, setIsSubmittingAuth] = useState(false);
 
   // 1. Fetch Hotels List
   useEffect(() => {
@@ -248,6 +249,7 @@ export default function App() {
   const handleAuthSubmit = async (e) => {
     e.preventDefault();
     setAuthError('');
+    setIsSubmittingAuth(true);
     const endpoint = authMode === 'login' ? '/auth/login' : '/auth/register';
     const payload = authMode === 'login' 
       ? { email: authEmail, password: authPassword }
@@ -270,12 +272,16 @@ export default function App() {
         setShowAuthModal(false);
         if (data.user.role === 'admin' || data.user.role === 'super_admin' || data.user.role === 'hotel_admin') {
           handleViewChange('admin');
+        } else {
+          setView('browse');
         }
       } else {
         setAuthError(data.message || 'ስህተት ተከስቷል');
       }
     } catch (err) {
       setAuthError('ከአገልጋይ ጋር መገናኘት አልተቻለም');
+    } finally {
+      setIsSubmittingAuth(false);
     }
   };
 
@@ -284,6 +290,9 @@ export default function App() {
     localStorage.removeItem('hotel_user');
     localStorage.removeItem('hotel_token');
     setView('browse');
+    setAuthEmail('');
+    setAuthPassword('');
+    setAuthError('');
   };
 
   const quickLoginAs = (email, password) => {
@@ -415,6 +424,198 @@ export default function App() {
     }
   };
 
+  // ==============================================================================
+  // AUTHENTICATION GATE: IF USER IS NOT LOGGED IN, SHOW AUTH PORTAL ONLY
+  // ==============================================================================
+  if (!user) {
+    return (
+      <div style={styles.authPortalContainer}>
+        <div style={styles.authPortalBackground}>
+          <div style={styles.authPortalOverlay}>
+            <div style={styles.authPortalCard}>
+              {/* BRAND HEADER */}
+              <div style={styles.authPortalHeader}>
+                <div style={styles.authLogoIcon}>
+                  <Hotel size={36} color="#ffffff" />
+                </div>
+                <h1 style={styles.authPortalTitle}>Ethiopian Luxury Hotel Collection</h1>
+                <p style={styles.authPortalSubtitle}>
+                  የአዲስ አበባ ምርጥ ሆቴሎች ማስያዣ እና መቆጣጠሪያ ፕላትፎርም
+                </p>
+                <div style={styles.authPortalNotice}>
+                  🔒 ወደ ድረ-ገጹ ለመግባት እባክዎ ኢሜይል እና የይለፍ ቃል ያስገቡ ወይም አዲስ ይመዝገቡ
+                </div>
+              </div>
+
+              {/* TABS: SIGN IN vs SIGN UP */}
+              <div style={styles.authTabContainer}>
+                <button 
+                  type="button"
+                  onClick={() => { setAuthMode('login'); setAuthError(''); }}
+                  style={authMode === 'login' ? styles.authTabActive : styles.authTabInactive}
+                >
+                  <LogIn size={16} /> ወደ ሲስተሙ ግባ (Sign In)
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => { setAuthMode('register'); setAuthError(''); }}
+                  style={authMode === 'register' ? styles.authTabActive : styles.authTabInactive}
+                >
+                  <UserPlus size={16} /> አዲስ ተመዝገብ (Sign Up)
+                </button>
+              </div>
+
+              {authError && <div style={styles.errorAlert}>{authError}</div>}
+
+              <form onSubmit={handleAuthSubmit} style={styles.bookingForm}>
+                {/* REGISTRATION ONLY FIELDS: FULL NAME & PHONE */}
+                {authMode === 'register' && (
+                  <>
+                    <div style={styles.formGroup}>
+                      <label style={styles.label}>ሙሉ ስም (Full Name) *</label>
+                      <input 
+                        type="text" 
+                        placeholder="ምሳሌ፡ አበበ ከበደ (Abebe Kebede)"
+                        value={authName} 
+                        onChange={(e) => setAuthName(e.target.value)}
+                        required 
+                        style={styles.modalInput}
+                      />
+                    </div>
+
+                    <div style={styles.formGroup}>
+                      <label style={styles.label}>ስልክ ቁጥር (Phone Number)</label>
+                      <input 
+                        type="tel" 
+                        placeholder="+251 91 123 4567"
+                        value={authPhone} 
+                        onChange={(e) => setAuthPhone(e.target.value)}
+                        style={styles.modalInput}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* EMAIL FIELD */}
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>ኢሜይል (Email Address) *</label>
+                  <input 
+                    type="email" 
+                    placeholder={authMode === 'login' ? "የእርስዎ ኢሜይል (ምሳሌ: abebe00@gmail.com)" : "ምሳሌ፡ abebe00@gmail.com"}
+                    value={authEmail} 
+                    onChange={(e) => setAuthEmail(e.target.value)}
+                    required 
+                    style={styles.modalInput}
+                  />
+                </div>
+
+                {/* PASSWORD FIELD */}
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>የይለፍ ቃል (Password) *</label>
+                  <input 
+                    type="password" 
+                    placeholder={authMode === 'login' ? "የይለፍ ቃልዎን ያስገቡ" : "ቢያንስ 6 ፊደላት ወይም ቁጥሮች"}
+                    value={authPassword} 
+                    onChange={(e) => setAuthPassword(e.target.value)}
+                    required 
+                    style={styles.modalInput}
+                  />
+                </div>
+
+                {/* SUBMIT BUTTON */}
+                <button type="submit" style={styles.confirmBtn} disabled={isSubmittingAuth}>
+                  {isSubmittingAuth 
+                    ? 'እየተረጋገጠ ነው...' 
+                    : (authMode === 'login' ? '🔑 ወደ ድረ-ገጹ ግባ (Sign In)' : '✨ አካውንት ክፈትና ግባ (Sign Up)')}
+                </button>
+
+                {/* SWITCH MODE PROMPT */}
+                <div style={styles.authSwitchPrompt}>
+                  {authMode === 'login' ? (
+                    <span>
+                      አዲስ ተጠቃሚ ነዎት?{' '}
+                      <button 
+                        type="button" 
+                        onClick={() => { setAuthMode('register'); setAuthError(''); }}
+                        style={styles.authSwitchBtn}
+                      >
+                        አሁኑኑ በነፃ ይመዝገቡ (Sign Up)
+                      </button>
+                    </span>
+                  ) : (
+                    <span>
+                      አስቀድመው አካውንት አለዎት?{' '}
+                      <button 
+                        type="button" 
+                        onClick={() => { setAuthMode('login'); setAuthError(''); }}
+                        style={styles.authSwitchBtn}
+                      >
+                        ወደ ሲስተሙ ይግቡ (Sign In)
+                      </button>
+                    </span>
+                  )}
+                </div>
+
+                {/* QUICK DEMO LOGINS */}
+                {authMode === 'login' && (
+                  <div style={styles.demoLoginBox}>
+                    <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', color: '#f59e0b' }}>
+                      ⚡ ፈጣን የመግቢያ አማራጮች (ጠቅ ያድርጉ)፦
+                    </p>
+                    <div style={styles.demoButtonsGrid}>
+                      <button 
+                        type="button"
+                        onClick={() => quickLoginAs('abebe00@gmail.com', 'password123')}
+                        style={styles.demoPillGreen}
+                      >
+                        👤 የተመዘገበ ደንበኛ (Customer: abebe00@gmail.com)
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => quickLoginAs('superadmin@platform.com', 'super123')}
+                        style={styles.demoPillGold}
+                      >
+                        👑 ሱፐር አድሚን (ሁሉንም የአዲስ አበባ ሆቴሎች መቆጣጠሪያ)
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => quickLoginAs('admin.skylight@hotel.com', 'skylight123')}
+                        style={styles.demoPill}
+                      >
+                        🏨 የስካይላይት ሆቴል አድሚን (Skylight Admin)
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => quickLoginAs('admin.sheraton@hotel.com', 'sheraton123')}
+                        style={styles.demoPill}
+                      >
+                        🏨 የሸራተን ሆቴል አድሚን (Sheraton Admin)
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => quickLoginAs('admin.hyatt@hotel.com', 'hyatt123')}
+                        style={styles.demoPill}
+                      >
+                        🏨 የሃያት ሪጀንሲ አድሚን (Hyatt Admin)
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => quickLoginAs('admin.radisson@hotel.com', 'radisson123')}
+                        style={styles.demoPill}
+                      >
+                        🏨 የራዲሰን ብሉ አድሚን (Radisson Admin)
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={styles.appContainer}>
       {/* 1. TOP PLATFORM NAVBAR */}
@@ -437,14 +638,12 @@ export default function App() {
             🏨 ክፍሎች (Rooms)
           </button>
 
-          {user && (
-            <button 
-              style={view === 'my-bookings' ? styles.navActiveBtn : styles.navBtn}
-              onClick={() => handleViewChange('my-bookings')}
-            >
-              📅 የእኔ ማስያዣዎች (My Bookings)
-            </button>
-          )}
+          <button 
+            style={view === 'my-bookings' ? styles.navActiveBtn : styles.navBtn}
+            onClick={() => handleViewChange('my-bookings')}
+          >
+            📅 የእኔ ማስያዣዎች (My Bookings)
+          </button>
 
           {(user?.role === 'super_admin' || user?.role === 'hotel_admin') && (
             <button 
@@ -459,37 +658,23 @@ export default function App() {
             </button>
           )}
 
-          {user ? (
-            <div style={styles.userSection}>
-              {user.role === 'super_admin' && (
-                <span style={styles.superBadge}>👑 Super Admin</span>
-              )}
-              {user.role === 'hotel_admin' && (
-                <span style={styles.hotelAdminBadge}>🏨 {user.hotel_name}</span>
-              )}
-              <span style={styles.userNameBadge}>
-                👤 {user.name}
-              </span>
-              <button onClick={handleLogout} style={styles.logoutBtn} title="ውጣ">
-                <LogOut size={16} />
-              </button>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <button 
-                onClick={() => { setAuthMode('login'); setAuthError(''); setShowAuthModal(true); }}
-                style={styles.loginBtn}
-              >
-                <LogIn size={16} /> ግባ (Sign In)
-              </button>
-              <button 
-                onClick={() => { setAuthMode('register'); setAuthError(''); setShowAuthModal(true); }}
-                style={styles.signUpBtn}
-              >
-                <UserPlus size={16} /> አዲስ ተመዝገብ (Sign Up)
-              </button>
-            </div>
-          )}
+          <div style={styles.userSection}>
+            {user.role === 'super_admin' && (
+              <span style={styles.superBadge}>👑 Super Admin</span>
+            )}
+            {user.role === 'hotel_admin' && (
+              <span style={styles.hotelAdminBadge}>🏨 {user.hotel_name}</span>
+            )}
+            {user.role === 'customer' && (
+              <span style={styles.customerBadge}>👤 ደንበኛ</span>
+            )}
+            <span style={styles.userNameBadge}>
+              👤 {user.name}
+            </span>
+            <button onClick={handleLogout} style={styles.logoutBtn} title="ከሲስተሙ ውጣ">
+              <LogOut size={16} /> ውጣ (Logout)
+            </button>
+          </div>
         </nav>
       </header>
 
@@ -1624,6 +1809,78 @@ export default function App() {
 // STYLES OBJECT
 // ==============================================================================
 const styles = {
+  authPortalContainer: {
+    minHeight: '100vh',
+    width: '100%',
+    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    backgroundColor: '#0f172a',
+    color: '#ffffff'
+  },
+  authPortalBackground: {
+    minHeight: '100vh',
+    width: '100%',
+    backgroundImage: "url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1920&q=80')",
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundAttachment: 'fixed',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  authPortalOverlay: {
+    width: '100%',
+    minHeight: '100vh',
+    backgroundColor: 'rgba(15, 23, 42, 0.88)',
+    backdropFilter: 'blur(8px)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '30px 16px'
+  },
+  authPortalCard: {
+    width: '100%',
+    maxWidth: '480px',
+    backgroundColor: '#1e293b',
+    border: '1px solid #334155',
+    borderRadius: '16px',
+    padding: '32px 28px',
+    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)'
+  },
+  authPortalHeader: {
+    textAlign: 'center',
+    marginBottom: '24px'
+  },
+  authLogoIcon: {
+    width: '56px',
+    height: '56px',
+    borderRadius: '14px',
+    backgroundColor: '#2563eb',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: '12px',
+    boxShadow: '0 8px 16px rgba(37, 99, 235, 0.4)'
+  },
+  authPortalTitle: {
+    fontSize: '22px',
+    fontWeight: '800',
+    color: '#ffffff',
+    margin: '0 0 6px 0',
+    letterSpacing: '-0.5px'
+  },
+  authPortalSubtitle: {
+    fontSize: '13px',
+    color: '#94a3b8',
+    margin: '0 0 14px 0'
+  },
+  authPortalNotice: {
+    fontSize: '12px',
+    backgroundColor: 'rgba(37, 99, 235, 0.12)',
+    color: '#93c5fd',
+    padding: '8px 12px',
+    borderRadius: '8px',
+    border: '1px solid rgba(59, 130, 246, 0.3)'
+  },
   appContainer: {
     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
     backgroundColor: '#0f172a',
@@ -1738,14 +1995,27 @@ const styles = {
     color: '#38bdf8',
     fontWeight: '600'
   },
+  customerBadge: {
+    backgroundColor: '#064e3b',
+    color: '#a7f3d0',
+    padding: '2px 8px',
+    borderRadius: '12px',
+    fontSize: '11px',
+    fontWeight: '700'
+  },
   logoutBtn: {
-    backgroundColor: 'transparent',
-    border: 'none',
-    color: '#ef4444',
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    border: '1px solid rgba(239, 68, 68, 0.4)',
+    color: '#f87171',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
-    padding: '4px'
+    gap: '6px',
+    padding: '6px 12px',
+    borderRadius: '8px',
+    fontSize: '13px',
+    fontWeight: '700',
+    transition: 'all 0.2s'
   },
   loginBtn: {
     backgroundColor: '#2563eb',
@@ -2640,6 +2910,17 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '6px'
+  },
+  demoPillGreen: {
+    backgroundColor: '#064e3b',
+    color: '#a7f3d0',
+    border: '1px solid #059669',
+    padding: '8px',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    fontWeight: 'bold',
+    textAlign: 'left',
+    fontSize: '12px'
   },
   demoPillGold: {
     backgroundColor: '#78350f',
