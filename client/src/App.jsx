@@ -468,32 +468,19 @@ export default function App() {
               {authError && <div style={styles.errorAlert}>{authError}</div>}
 
               <form onSubmit={handleAuthSubmit} style={styles.bookingForm}>
-                {/* REGISTRATION ONLY FIELDS: FULL NAME & PHONE */}
+                {/* REGISTRATION ONLY FIELD: FULL NAME */}
                 {authMode === 'register' && (
-                  <>
-                    <div style={styles.formGroup}>
-                      <label style={styles.label}>ሙሉ ስም (Full Name) *</label>
-                      <input 
-                        type="text" 
-                        placeholder="ምሳሌ፡ አበበ ከበደ (Abebe Kebede)"
-                        value={authName} 
-                        onChange={(e) => setAuthName(e.target.value)}
-                        required 
-                        style={styles.modalInput}
-                      />
-                    </div>
-
-                    <div style={styles.formGroup}>
-                      <label style={styles.label}>ስልክ ቁጥር (Phone Number)</label>
-                      <input 
-                        type="tel" 
-                        placeholder="+251 91 123 4567"
-                        value={authPhone} 
-                        onChange={(e) => setAuthPhone(e.target.value)}
-                        style={styles.modalInput}
-                      />
-                    </div>
-                  </>
+                  <div style={styles.formGroup}>
+                    <label style={styles.label}>ሙሉ ስም (Full Name) *</label>
+                    <input 
+                      type="text" 
+                      placeholder="ምሳሌ፡ አበበ ከበደ (Abebe Kebede)"
+                      value={authName} 
+                      onChange={(e) => setAuthName(e.target.value)}
+                      required 
+                      style={styles.modalInput}
+                    />
+                  </div>
                 )}
 
                 {/* EMAIL FIELD */}
@@ -555,59 +542,6 @@ export default function App() {
                     </span>
                   )}
                 </div>
-
-                {/* QUICK DEMO LOGINS */}
-                {authMode === 'login' && (
-                  <div style={styles.demoLoginBox}>
-                    <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', color: '#f59e0b' }}>
-                      ⚡ ፈጣን የመግቢያ አማራጮች (ጠቅ ያድርጉ)፦
-                    </p>
-                    <div style={styles.demoButtonsGrid}>
-                      <button 
-                        type="button"
-                        onClick={() => quickLoginAs('abebe00@gmail.com', 'password123')}
-                        style={styles.demoPillGreen}
-                      >
-                        👤 የተመዘገበ ደንበኛ (Customer: abebe00@gmail.com)
-                      </button>
-                      <button 
-                        type="button"
-                        onClick={() => quickLoginAs('superadmin@platform.com', 'super123')}
-                        style={styles.demoPillGold}
-                      >
-                        👑 ሱፐር አድሚን (ሁሉንም የአዲስ አበባ ሆቴሎች መቆጣጠሪያ)
-                      </button>
-                      <button 
-                        type="button"
-                        onClick={() => quickLoginAs('admin.skylight@hotel.com', 'skylight123')}
-                        style={styles.demoPill}
-                      >
-                        🏨 የስካይላይት ሆቴል አድሚን (Skylight Admin)
-                      </button>
-                      <button 
-                        type="button"
-                        onClick={() => quickLoginAs('admin.sheraton@hotel.com', 'sheraton123')}
-                        style={styles.demoPill}
-                      >
-                        🏨 የሸራተን ሆቴል አድሚን (Sheraton Admin)
-                      </button>
-                      <button 
-                        type="button"
-                        onClick={() => quickLoginAs('admin.hyatt@hotel.com', 'hyatt123')}
-                        style={styles.demoPill}
-                      >
-                        🏨 የሃያት ሪጀንሲ አድሚን (Hyatt Admin)
-                      </button>
-                      <button 
-                        type="button"
-                        onClick={() => quickLoginAs('admin.radisson@hotel.com', 'radisson123')}
-                        style={styles.demoPill}
-                      >
-                        🏨 የራዲሰን ብሉ አድሚን (Radisson Admin)
-                      </button>
-                    </div>
-                  </div>
-                )}
               </form>
             </div>
           </div>
@@ -1636,171 +1570,7 @@ export default function App() {
         </div>
       )}
 
-      {/* 8. AUTH MODAL (Login/Register with Demo Credentials) */}
-      {showAuthModal && (
-        <div style={styles.modalOverlay}>
-          <div style={{ ...styles.modalContent, maxWidth: '480px' }}>
-            <div style={styles.modalHeader}>
-              <h3 style={styles.modalTitle}>
-                {authMode === 'login' ? '🔑 ወደ ሲስተሙ ግባ (Sign In)' : '✨ አዲስ አካውንት ክፈት (Sign Up)'}
-              </h3>
-              <button onClick={() => setShowAuthModal(false)} style={styles.closeBtn}><X size={20} /></button>
-            </div>
 
-            {/* TAB SELECTOR: SIGN IN vs SIGN UP */}
-            <div style={styles.authTabContainer}>
-              <button 
-                type="button"
-                onClick={() => { setAuthMode('login'); setAuthError(''); }}
-                style={authMode === 'login' ? styles.authTabActive : styles.authTabInactive}
-              >
-                <LogIn size={16} /> ግባ (Sign In)
-              </button>
-              <button 
-                type="button"
-                onClick={() => { setAuthMode('register'); setAuthError(''); }}
-                style={authMode === 'register' ? styles.authTabActive : styles.authTabInactive}
-              >
-                <UserPlus size={16} /> አዲስ ተመዝገብ (Sign Up)
-              </button>
-            </div>
-
-            {authError && <div style={styles.errorAlert}>{authError}</div>}
-
-            <form onSubmit={handleAuthSubmit} style={styles.bookingForm}>
-              {/* REGISTRATION ONLY FIELDS: FULL NAME & PHONE */}
-              {authMode === 'register' && (
-                <>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>ሙሉ ስም (Full Name) *</label>
-                    <input 
-                      type="text" 
-                      placeholder="ምሳሌ፡ አበበ ከበደ (Abebe Kebede)"
-                      value={authName} 
-                      onChange={(e) => setAuthName(e.target.value)}
-                      required 
-                      style={styles.modalInput}
-                    />
-                  </div>
-
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>ስልክ ቁጥር (Phone Number)</label>
-                    <input 
-                      type="tel" 
-                      placeholder="+251 91 123 4567"
-                      value={authPhone} 
-                      onChange={(e) => setAuthPhone(e.target.value)}
-                      style={styles.modalInput}
-                    />
-                  </div>
-                </>
-              )}
-
-              {/* EMAIL FIELD */}
-              <div style={styles.formGroup}>
-                <label style={styles.label}>ኢሜይል (Email Address) *</label>
-                <input 
-                  type="email" 
-                  placeholder={authMode === 'login' ? "የእርስዎ ኢሜይል ወይም የአድሚን ኢሜይል" : "ምሳሌ፡ abebe00@gmail.com"}
-                  value={authEmail} 
-                  onChange={(e) => setAuthEmail(e.target.value)}
-                  required 
-                  style={styles.modalInput}
-                />
-              </div>
-
-              {/* PASSWORD FIELD */}
-              <div style={styles.formGroup}>
-                <label style={styles.label}>የይለፍ ቃል (Password) *</label>
-                <input 
-                  type="password" 
-                  placeholder={authMode === 'login' ? "የይለፍ ቃልዎን ያስገቡ" : "ቢያንስ 6 ፊደላት ወይም ቁጥሮች"}
-                  value={authPassword} 
-                  onChange={(e) => setAuthPassword(e.target.value)}
-                  required 
-                  style={styles.modalInput}
-                />
-              </div>
-
-              {/* SUBMIT BUTTON */}
-              <button type="submit" style={styles.confirmBtn}>
-                {authMode === 'login' ? '🔑 ወደ ሲስተሙ ግባ (Sign In)' : '✨ አካውንት ክፈትና ተመዝገብ (Sign Up)'}
-              </button>
-
-              {/* SWITCH MODE PROMPT */}
-              <div style={styles.authSwitchPrompt}>
-                {authMode === 'login' ? (
-                  <span>
-                    አዲስ ተጠቃሚ ነዎት?{' '}
-                    <button 
-                      type="button" 
-                      onClick={() => { setAuthMode('register'); setAuthError(''); }}
-                      style={styles.authSwitchBtn}
-                    >
-                      አሁኑኑ በነፃ ይመዝገቡ (Sign Up)
-                    </button>
-                  </span>
-                ) : (
-                  <span>
-                    አስቀድመው አካውንት አለዎት?{' '}
-                    <button 
-                      type="button" 
-                      onClick={() => { setAuthMode('login'); setAuthError(''); }}
-                      style={styles.authSwitchBtn}
-                    >
-                      ወደ ሲስተሙ ይግቡ (Sign In)
-                    </button>
-                  </span>
-                )}
-              </div>
-
-              {/* QUICK DEMO LOGINS (ONLY VISIBLE IN LOGIN MODE) */}
-              {authMode === 'login' && (
-                <div style={styles.demoLoginBox}>
-                  <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', color: '#f59e0b' }}>⚡ በአዲስ አበባ ሆቴል አካውንቶች በፍጥነት ለመግባት ጠቅ ያድርጉ፦</p>
-                  <div style={styles.demoButtonsGrid}>
-                    <button 
-                      type="button"
-                      onClick={() => quickLoginAs('superadmin@platform.com', 'super123')}
-                      style={styles.demoPillGold}
-                    >
-                      👑 ሱፐር አድሚን (ሁሉንም የአዲስ አበባ ሆቴሎች መቆጣጠሪያ)
-                    </button>
-                    <button 
-                      type="button"
-                      onClick={() => quickLoginAs('admin.skylight@hotel.com', 'skylight123')}
-                      style={styles.demoPill}
-                    >
-                      🏨 የስካይላይት ሆቴል አድሚን (Skylight Admin)
-                    </button>
-                    <button 
-                      type="button"
-                      onClick={() => quickLoginAs('admin.sheraton@hotel.com', 'sheraton123')}
-                      style={styles.demoPill}
-                    >
-                      🏨 የሸራተን ሆቴል አድሚን (Sheraton Admin)
-                    </button>
-                    <button 
-                      type="button"
-                      onClick={() => quickLoginAs('admin.hyatt@hotel.com', 'hyatt123')}
-                      style={styles.demoPill}
-                    >
-                      🏨 የሃያት ሪጀንሲ አድሚን (Hyatt Admin)
-                    </button>
-                    <button 
-                      type="button"
-                      onClick={() => quickLoginAs('admin.radisson@hotel.com', 'radisson123')}
-                      style={styles.demoPill}
-                    >
-                      🏨 የራዲሰን ብሉ አድሚን (Radisson Admin)
-                    </button>
-                  </div>
-                </div>
-              )}
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
